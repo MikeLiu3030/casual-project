@@ -2797,11 +2797,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\WORK\\gradespace项目\\casual\\casual_backend\\casual_backend\\casual_backend.csproj",
+      "projectUniqueName": "D:\\WORK\\gradespace项目\\casual-project\\casual\\casual_backend\\casual_backend\\casual_backend.csproj",
       "projectName": "casual_backend",
-      "projectPath": "D:\\WORK\\gradespace项目\\casual\\casual_backend\\casual_backend\\casual_backend.csproj",
+      "projectPath": "D:\\WORK\\gradespace项目\\casual-project\\casual\\casual_backend\\casual_backend\\casual_backend.csproj",
       "packagesPath": "C:\\Users\\liuro\\.nuget\\packages\\",
-      "outputPath": "D:\\WORK\\gradespace项目\\casual\\casual_backend\\casual_backend\\obj\\",
+      "outputPath": "D:\\WORK\\gradespace项目\\casual-project\\casual\\casual_backend\\casual_backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -2820,7 +2820,6 @@
       },
       "frameworks": {
         "net10.0": {
-          "framework": "net10.0",
           "targetAlias": "net10.0",
           "projectReferences": {}
         }
@@ -2839,7 +2838,6 @@
     },
     "frameworks": {
       "net10.0": {
-        "framework": "net10.0",
         "targetAlias": "net10.0",
         "dependencies": {
           "HtmlAgilityPack": {

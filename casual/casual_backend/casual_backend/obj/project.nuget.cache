@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "oD/eGhtttJg=",
+  "dgSpecHash": "xJewHGfwpA4=",
   "success": true,
-  "projectFilePath": "D:\\WORK\\gradespace项目\\casual\\casual_backend\\casual_backend\\casual_backend.csproj",
+  "projectFilePath": "D:\\WORK\\gradespace项目\\casual-project\\casual\\casual_backend\\casual_backend\\casual_backend.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\liuro\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512",
     "C:\\Users\\liuro\\.nuget\\packages\\google.protobuf\\3.32.0\\google.protobuf.3.32.0.nupkg.sha512",

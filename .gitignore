@@ -1,4 +1,5 @@
 
-appsettings.json
-appsettings.Development.json
+**/appsettings.json
+**/appsettings.Development.json
+**/node_modules/
 
