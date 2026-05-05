@@ -81,8 +81,7 @@ export default function CasualJob(){
             setErrorMsg("Please select date!")
             return;
         }
-        console.log(targetDate);
-        
+
         try{
             
             const result = await apiGet<MikeJob[]>(`api/GetJob/GetJob?date=${targetDate}`);
@@ -109,12 +108,13 @@ export default function CasualJob(){
     return (
     <>
         <section>
-            <div className='top-controls'>
+            <div className='top-controls' >
                 <input 
                     type="date"
                     className='date-input'
                     value={targetDate}
-                    onChange={(e) => setTargetDate(e.target.value)} />
+                    onChange={(e) => setTargetDate(e.target.value)}
+                    style={{}} />
                 <button className='btn' onClick={handleGetdata}>Get Data</button>
             </div>
 

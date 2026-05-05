@@ -24,7 +24,7 @@ namespace casual_backend.Controllers
             var jobs = await jobDataService.GetJobsByDateAsync(targetDate);
             if (!jobs.Any())
             {
-                return NotFound($"[{targetDate.Date}]:今天没有数据！");
+                return NotFound($"[{targetDate.Date}]:There is no data today！");
             }
 
             return Ok( jobs );
