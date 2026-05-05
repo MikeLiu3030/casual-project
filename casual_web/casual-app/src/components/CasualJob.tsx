@@ -85,7 +85,7 @@ export default function CasualJob(){
         
         try{
             
-            const result = await apiGet<MikeJob[]>(`api/GetJob/GetJob?date={targetDate}`);
+            const result = await apiGet<MikeJob[]>(`api/GetJob/GetJob?date=${targetDate}`);
 
             setJobs(result);
             setErrorMsg(null);

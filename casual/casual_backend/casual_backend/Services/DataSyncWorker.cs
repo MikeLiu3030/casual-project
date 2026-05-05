@@ -6,6 +6,7 @@ namespace casual_backend.Services
     public class DataSyncWorker : BackgroundService
     {
         private readonly IServiceProvider serviceProvider;
+
         public DataSyncWorker(IServiceProvider serviceProvider)
         {
             this.serviceProvider = serviceProvider;
@@ -14,16 +15,18 @@ namespace casual_backend.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             using var timer = new PeriodicTimer(TimeSpan.FromMinutes(1));
-            int count=0;
+            int count = 0;
+
             while (await timer.WaitForNextTickAsync(stoppingToken))
             {
-                
-                count++;//统计同步次数
+                count++; // Track sync count 统计同步次数
                 try
                 {
                     using var scope = serviceProvider.CreateScope();
                     var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-                    DateTime targetDate = DateTime.Now.AddDays(-7);
+
+                    // Set target date
+                    DateTime targetDate = DateTime.Now.AddDays(-1);// Sync yesterday's data
 
                     // 1. Get the data of specified date
                     var rawJobs = await db.Casual_all
@@ -41,31 +44,36 @@ namespace casual_backend.Services
                         .ToListAsync();
 
                     if (!rawJobs.Any())
+                    {
                         Console.WriteLine("No data yesterday!");
                         continue; // no data
+                    }
 
-                    // 2. 在内存中剔除含有空值的数据
+                    // 2. Remove data containing nulls in-memory (在内存中剔除含有空值的数据)
                     var validJobs = rawJobs.Where(j =>
                         !string.IsNullOrWhiteSpace(j.Title) &&
                         !string.IsNullOrWhiteSpace(j.Location) &&
                         !string.IsNullOrWhiteSpace(j.UrlDetail) &&
                         !string.IsNullOrWhiteSpace(j.Description)
-                        ).ToList();
+                    ).ToList();
 
                     if (!validJobs.Any())
+                    {
+                        Console.WriteLine("There is no validJobs!");
                         continue;
+                    }
 
-                    // 3.1 提取出这批有效数据的所有Id
+                    // 3.1 Extract all IDs from the valid data. (提取出这批有效数据的所有Id)
                     var validJobsIds = validJobs.Select(j => j.Id).ToArray();
 
-                    //3.2 查询MikeJobs 表里面，这些Id 有哪些是已经存储过的
+                    // 3.2 Identify existing IDs in the MikeJobs table (查询MikeJobs 表里面，这些Id 有哪些是已经存储过的)
                     var existingIds = await db.MikeJobs
                         .AsNoTracking()
                         .Where(m => m.PostedAt == targetDate.Date)
                         .Select(m => m.Id)
                         .ToListAsync();
 
-                    //3.3 再次过滤：只保留哪些不在existingIds 里的数据            
+                    // 3.3 Filter out existing records to avoid duplicates (再次过滤：只保留不在existingIds 里的数据)
                     var jobsToSave = validJobs
                         .Where(j => !existingIds.Contains(j.Id))
                         .Select(j => new MikeJobs
@@ -78,16 +86,19 @@ namespace casual_backend.Services
                             Description = j.Description,
                         }).ToList();
 
-                    await db.MikeJobs.AddRangeAsync(jobsToSave);
-                    await db.SaveChangesAsync();
-                    Console.WriteLine($"[{DateTime.Now}]自动同步完成第{count}次");
+                    if (jobsToSave.Any())
+                    {
+                        await db.MikeJobs.AddRangeAsync(jobsToSave);
+                        await db.SaveChangesAsync();
+                        Console.WriteLine($"[{DateTime.Now}] Successfully synced {jobsToSave.Count} new records.");
+                    }
 
+                    Console.WriteLine($"[{DateTime.Now}] Auto-sync cycle {count} completed。");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[{DateTime.Now}] 自动同步发生错误：{ex.Message}");
+                    Console.WriteLine($"[{DateTime.Now}] Auto-sync error：{ex.Message}");
                 }
-
             }
         }
     }
