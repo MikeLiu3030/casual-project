@@ -14,6 +14,8 @@ namespace casual_backend.Model
             builder.Property(j => j.PostedAt).HasColumnType("date");
             builder.Property(j => j.UrlDetail).HasMaxLength(255);
             builder.Property(j => j.Description).HasColumnType("longtext");
+            builder.Property(j => j.Salary).HasMaxLength(255);
+            builder.Property(j => j.Category).HasMaxLength(255);
         }
     }
 }

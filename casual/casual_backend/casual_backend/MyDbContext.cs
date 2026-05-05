@@ -21,7 +21,7 @@ namespace casual_backend
         {
             base.OnModelCreating(modelBuilder);
 
-            //从当前程序集加载所有IEntityTypeConfiguration
+            //Loading assembly
             modelBuilder.ApplyConfigurationsFromAssembly(this.GetType().Assembly);
         }
 

@@ -45,25 +45,14 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
                 {/* ref={cardRef} tells html-to-image exactly what to capture */}
                 <div className='jobDev' ref={cardRef}>
                     <div className='job-item'>
-                        <strong>Title</strong>
-                        <div>{job.title}</div>
-
-                        <strong>Location</strong>
-                        <div>{job.location}</div>
-
-                        <strong>Url Detail</strong>
-                        <div className='url-detail'>{job.urlDetail}</div>
-
-                        <strong>Description</strong>
-                        <div>{job.description}</div>
-
-                        <strong>Posted At</strong>
-                        <div>{job.postedAt?.split('T')[0]}</div>
+                        <div><strong>{job.title}</strong></div>
+                        <div>{job.salary}</div>
+                        <div>{job.location} | {job.category}</div>
                     </div>
                 </div>
-                <div className='imageSaveButton'>
+                {/* <div className='imageSaveButton'>
                     <button className='btn' onClick={onButtonClick}>Save Image</button>
-                </div>
+                </div> */}
             </div>
         </>
     );
@@ -72,8 +61,9 @@ const JobCard: React.FC<JobCardProps> = ({ job }) => {
 export default function CasualJob() {
     // State management for jobs list, error messages, and the date filter
     const [jobs, setJobs] = useState<MikeJob[]>([]);
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [targetDate, setTargetDate] = useState<string>('');
+    const [errorMsg, setErrorMsg] = useState<string | null>();
+    const [targetDate, setTargetDate] = useState<string>();
+    const [initial, setInitial] = useState(true);
 
     const handleGetdata = async () => {
         // Validation: Prevent API calls if no date is selected
@@ -85,8 +75,9 @@ export default function CasualJob() {
         try {
             // Fetch data using the selected date as a query parameter
             const result = await apiGet<MikeJob[]>(`api/GetJob/GetJob?date=${targetDate}`);
-
+            console.log(result);
             setJobs(result);
+            setInitial(false)
             setErrorMsg(null); // Clear errors on success
         } catch (err) {
             // Comprehensive Axios error handling
@@ -130,13 +121,18 @@ export default function CasualJob() {
                         {errorMsg}
                     </div>
                     :
-                    <div>
-                        <ul className="job-list">
-                            {jobs.map((job) => (
-                                <JobCard key={job.id} job={job} />
-                            ))}
-                        </ul>
-                    </div>
+                    initial? (<div><strong>Please Select a Date!! </strong></div>) :                        
+                    (<div className="content-item">
+                        <div className="jobDisplay-item">
+                            <ul className="job-list">
+                                {jobs.map((job) => (
+                                    <JobCard key={job.id} job={job} />
+                                ))}
+                            </ul>
+                        </div>
+
+                        <div className="statistic-item">hello</div>
+                    </div>)
                 }
             </section>
             <hr className='my-divider' />

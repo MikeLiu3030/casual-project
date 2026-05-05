@@ -5,4 +5,6 @@ export  interface MikeJob {
     urlDetail:string;
     description:string;
     postedAt:string;
+    salary:string;
+    category:string;
 }

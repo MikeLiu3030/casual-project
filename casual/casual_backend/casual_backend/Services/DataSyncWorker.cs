@@ -40,6 +40,8 @@ namespace casual_backend.Services
                             Location = j.Location_classified,
                             UrlDetail = j.Url_detail,
                             Description = j.Description_short,
+                            Category = j.Category_classified,
+                            Salary = j.Salary
                         })
                         .ToListAsync();
 
@@ -54,7 +56,9 @@ namespace casual_backend.Services
                         !string.IsNullOrWhiteSpace(j.Title) &&
                         !string.IsNullOrWhiteSpace(j.Location) &&
                         !string.IsNullOrWhiteSpace(j.UrlDetail) &&
-                        !string.IsNullOrWhiteSpace(j.Description)
+                        !string.IsNullOrWhiteSpace(j.Description) &&
+                        !string.IsNullOrWhiteSpace(j.Category) &&
+                        !string.IsNullOrWhiteSpace(j.Salary)
                     ).ToList();
 
                     if (!validJobs.Any())
@@ -84,6 +88,8 @@ namespace casual_backend.Services
                             Location = j.Location,
                             UrlDetail = j.UrlDetail,
                             Description = j.Description,
+                            Category = j.Category,
+                            Salary = j.Salary,
                         }).ToList();
 
                     if (jobsToSave.Any())

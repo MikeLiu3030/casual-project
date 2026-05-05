@@ -8,5 +8,7 @@
         public DateTime? PostedAt { get; set; }
         public string?  UrlDetail { get; set; }
         public string? Description { get; set; }
+        public string? Salary { get; set; }
+        public string? Category { get; set; }
     }
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using casual_backend;
 
@@ -10,9 +11,11 @@ using casual_backend;
 namespace casual_backend.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260505031928_v4")]
+    partial class v4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -126,7 +129,7 @@ namespace casual_backend.Migrations
                     b.Property<DateTime?>("PostedAt")
                         .HasColumnType("date");
 
-                    b.Property<string>("Salary")
+                    b.Property<string>("Selary")
                         .HasMaxLength(255)
                         .HasColumnType("varchar(255)");
 
