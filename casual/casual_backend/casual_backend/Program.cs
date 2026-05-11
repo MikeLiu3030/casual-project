@@ -15,6 +15,7 @@ string? connectingString = builder.Configuration.GetConnectionString("DefaultCon
 builder.Services.AddDbContext<MyDbContext>(options =>options.UseMySQL(connectingString));
 builder.Services.AddScoped<IJobDataService, JobDataService>();
 builder.Services.AddHostedService<DataSyncWorker>();
+builder.Services.AddScoped<DataStatisticsWorker>();
 //注册CORS
 builder.Services.AddCors( options =>
 {

@@ -1,141 +1,185 @@
-import { useState } from 'react';
-import React, { useCallback, useRef } from 'react';
-
+import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { apiGet } from '../Api';
-import type { MikeJob } from '../Types/MikeJob-type';
+import type { MikeJob, DashboardData } from '../Types/Data-type';
 import "../Css/casualjob.css";
 
 import { toPng } from 'html-to-image';
 import axios from 'axios';
+import { 
+    PieChart, Pie, LineChart, Line, BarChart, Bar, 
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
+} from 'recharts';
 
-interface JobCardProps {
-    job: MikeJob;
-}
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d', '#ffc658'];
 
-const JobCard: React.FC<JobCardProps> = ({ job }) => {
-    // Reference to the specific card DOM element for image capture
-    const cardRef = useRef<HTMLDivElement>(null);
-
-    // Memoized function to convert HTML to PNG and trigger a download
-    const onButtonClick = useCallback(() => {
-        if (cardRef.current === null) return;
-
-        toPng(cardRef.current, {
-            cacheBust: true, // Prevents browser caching issues
-            canvasWidth: 1080,
-            canvasHeight: 1440,
-            backgroundColor: '#f4ff7f6'
-        })
-            .then((dataUrl) => {
-                // Create a virtual link to trigger the browser download
-                const link = document.createElement('a');
-                link.download = `${job.id}.png`;
-                link.href = dataUrl;
-                link.click();
-            })
-            .catch((err) => {
-                console.error("Image generation failed:", err);
-            });
-
-    }, [job]);
-
-    return (
-        <>
-            <div className='job-card-wrapper'>
-                {/* ref={cardRef} tells html-to-image exactly what to capture */}
-                <div className='jobDev' ref={cardRef}>
-                    <div className='job-item'>
-                        <div><strong>{job.title}</strong></div>
-                        <div>{job.salary}</div>
-                        <div>{job.location} | {job.category}</div>
-                    </div>
-                </div>
-                {/* <div className='imageSaveButton'>
-                    <button className='btn' onClick={onButtonClick}>Save Image</button>
-                </div> */}
+const JobCard: React.FC<{ job: MikeJob }> = ({ job }) => (
+    <div className='job-card-wrapper'>
+        <div className='jobDev'>
+            <div className='job-item'>
+                <div><strong>{job.title}</strong></div>
+                <div className="job-salary">{job.salary}</div>
+                <div className="job-meta">{job.location} | {job.category}</div>
             </div>
-        </>
-    );
-}
+        </div>
+    </div>
+);
 
 export default function CasualJob() {
-    // State management for jobs list, error messages, and the date filter
-    const [jobs, setJobs] = useState<MikeJob[]>([]);
-    const [errorMsg, setErrorMsg] = useState<string | null>();
-    const [targetDate, setTargetDate] = useState<string>();
-    const [initial, setInitial] = useState(true);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [targetDate, setTargetDate] = useState<string>('');
+    const [initial, setInitial] = useState<boolean>(true);
+
+    const jobsListRef = useRef<HTMLDivElement>(null)
+    const chartsPosterRef = useRef<HTMLDivElement>(null);
 
     const handleGetdata = async () => {
-        // Validation: Prevent API calls if no date is selected
         if (!targetDate) {
             setErrorMsg("Please select a date!");
             return;
         }
-
         try {
-            // Fetch data using the selected date as a query parameter
-            const result = await apiGet<MikeJob[]>(`api/GetJob/GetJob?date=${targetDate}`);
-            console.log(result);
-            setJobs(result);
-            setInitial(false)
-            setErrorMsg(null); // Clear errors on success
+            const result = await apiGet<DashboardData>(`api/GetJob/GetJob?date=${targetDate}`);
+            setDashboardData(result);
+            setInitial(false);
+            setErrorMsg(null);
         } catch (err) {
-            // Comprehensive Axios error handling
             if (axios.isAxiosError(err)) {
-                if (err.response) {
-                    // Scenario 1: Server responded with an error (e.g., 404, 500)
-                    const serverMessage = typeof err.response.data === 'string' ?
-                        err.response.data : (err.response.data.message);
-                    setErrorMsg(serverMessage || "Server Error");
-                } else if (err.request) {
-                    // Scenario 2: Request sent but no response received (Network/CORS)
-                    setErrorMsg("Cannot connect to server, please check your internet!");
-                } else {
-                    // Scenario 3: Error during request setup
-                    setErrorMsg(`Request configuration error: ${err.message}`);
-                }
+                const serverMessage = typeof err.response?.data === 'string' 
+                    ? err.response.data : err.response?.data?.message;
+                setErrorMsg(serverMessage || "Server Error");
             } else {
                 setErrorMsg('An unexpected error occurred!');
             }
         }
     }
 
-    return (
-        <>
-            <section>
-                <div className='top-controls'>
-                    {/* Controlled input for the date picker */}
-                    <input
-                        type="date"
-                        className='date-input'
-                        value={targetDate}
-                        onChange={(e) => setTargetDate(e.target.value)}
-                        style={{ marginRight: '10px' }} // Spacing added here
-                    />
-                    <button className='btn' onClick={handleGetdata}>Get Data</button>
-                </div>
+    const chartData = useMemo(() => {
+        return dashboardData?.jobsByCategory.map((item, index) => ({
+                ...item,
+                fill:COLORS[index % COLORS.length]
+            })) || [];
+    }, [dashboardData])
 
-                {/* Conditional Rendering: Show error message OR the job list */}
-                {errorMsg ?
-                    <div className="error-display">
-                        {errorMsg}
-                    </div>
-                    :
-                    initial? (<div><strong>Please Select a Date!! </strong></div>) :                        
-                    (<div className="content-item">
-                        <div className="jobDisplay-item">
-                            <ul className="job-list">
-                                {jobs.map((job) => (
-                                    <JobCard key={job.id} job={job} />
-                                ))}
-                            </ul>
+    const saveImage = async (ref: React.RefObject<HTMLDivElement | null>, fileName: string) =>{
+        if (ref.current === null) return;
+        try{
+            const dataUrl = await toPng(ref.current, {
+                cacheBust: true,
+                backgroundColor:'#ffffff',
+                pixelRatio: 2
+            });
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = dataUrl;
+            link.click();
+        } catch (err) {
+            console.error(`Export ${fileName} failed:`, err)
+        }
+    };
+
+
+    const downloadPoster = useCallback( async () => {
+        await saveImage(jobsListRef, `Jobs_List_${targetDate}.png`);
+        setTimeout(async () => {
+            await saveImage(chartsPosterRef, `Market_Report_${targetDate}.png`)
+        }, 500);
+    }, [targetDate]);
+
+    return (
+        <section className="dashboard-section">
+            <div className='top-controls-container'>
+                <input type="date" className='date-input' value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
+                <button className='btn btn-primary' onClick={handleGetdata}>Get Data</button>
+                {dashboardData && (
+                    <button className='btn btn-success' onClick={downloadPoster}>Download Poster</button>
+                )}
+            </div>
+
+            {errorMsg ? (
+                <div className="error-display">{errorMsg}</div>
+            ) : initial ? (
+                <div className="initial-prompt"><strong>Please Select a Date!</strong></div>
+            ) : dashboardData ? (
+                <div className="content-item">                    
+                    <div className="jobDisplay-item" ref={jobsListRef}>
+                        <div className="poster-header">
+                            <h2>Jobs List </h2>
+                            <p>Date: {targetDate}</p>
                         </div>
 
-                        <div className="statistic-item">hello</div>
-                    </div>)
-                }
-            </section>
-            <hr className='my-divider' />
-        </>
+                        <div className="job-list">
+                            {dashboardData.dailyJobs?.map((job) => <JobCard key={job.id} job={job} />)}
+                        </div>
+                    </div>
+
+                    <div className="statistic-poster" ref={chartsPosterRef}>
+                        <div className="poster-header">
+                            <h2>Casual Job Market Report</h2>
+                            <p>Date: {targetDate}</p>
+                        </div>
+
+                        <div className="chart-wrapper">   
+                            <h4>Jobs by Category</h4>                         
+                            <ResponsiveContainer width="100%" height={220}>
+                                <PieChart>
+                                    <Pie 
+                                        data={chartData} 
+                                        dataKey="count" nameKey="name" 
+                                        cx="50%" 
+                                        cy="30%" 
+                                        outerRadius={65} 
+                                        innerRadius={35}
+                                        label={({ percent=0 }) => `${(percent * 100).toFixed(0)}%`}
+                                    >
+                                    </Pie>
+                                    <Tooltip />
+                                    <Legend 
+                                        layout="vertical" 
+                                        verticalAlign="top" 
+                                        align="right"
+                                        wrapperStyle={{ fontSize:'10px' }}/>
+                                </PieChart>
+                            </ResponsiveContainer>                            
+                        </div>
+
+                        <div className="chart-wrapper">
+                            <h4>Jobs by Location</h4>                            
+                            <ResponsiveContainer width="100%" height={250}>
+                                <BarChart 
+                                    data={[...dashboardData.jobsByLocation].sort((a,b) => a.count - b.count)} 
+                                    layout="vertical" 
+                                    margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                                >
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                    <XAxis type="number" />
+                                    <YAxis dataKey="name" type="category" width={70} tick={{fontSize: 12}} />
+                                    <Tooltip cursor={{fill: 'transparent'}} />
+                                    <Bar dataKey="count" fill="#00C49F" radius={[0, 4, 4, 0]} barSize={20} />
+                                </BarChart>
+                            </ResponsiveContainer>                            
+                        </div>
+
+                        <div className="chart-wrapper">
+                            <h4>14-Day Posting Trend</h4>
+                            <ResponsiveContainer width="100%" height={250}>
+                                <LineChart data={dashboardData.jobTrends} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis 
+                                        dataKey="date" 
+                                        tickFormatter={(t) => new Date(t).toLocaleDateString('en-NZ', { month: 'short', day: 'numeric' })}
+                                        tick={{fontSize: 11}}
+                                    />
+                                    <YAxis tick={{fontSize: 12}} />
+                                    <Tooltip />
+                                    <Line type="monotone" dataKey="newJobsCount" stroke="#8884d8" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                                </LineChart>
+                            </ResponsiveContainer>
+                            
+                        </div>                                          
+                    </div>
+                </div>
+            ) : null}
+        </section>
     );
 }

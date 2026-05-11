@@ -23,7 +23,7 @@ namespace casual_backend.Services
             List<MikeJobs> Jobs = new List<MikeJobs>();
             Jobs =  await db.MikeJobs.AsNoTracking()               
                 .Where(j => j.PostedAt == targetDate.Date)
-                .Take(5)
+                .Take(10)
                 .ToListAsync();
             return Jobs;
         }
