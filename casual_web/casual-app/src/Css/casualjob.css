@@ -1,4 +1,4 @@
-
+/* src/Css/casualjob.css */
 .dashboard-section {
     padding: 20px;
     background-color: #f0f2f5; 
@@ -8,10 +8,10 @@
 .content-item {
     display: flex;
     width:100%;
-    max-width: 1000px;
+    max-width: 1040px;
 
-    height: auto;
-    min-height: 90vh;
+    height: 100%;
+    max-height: 1440px;
 
     flex-wrap: wrap;
 

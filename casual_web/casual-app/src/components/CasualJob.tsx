@@ -1,3 +1,4 @@
+// src/components/CasualJob.tsx
 import React, { useState, useCallback, useRef, useMemo } from 'react';
 import { apiGet } from '../Api';
 import type { MikeJob, DashboardData } from '../Types/Data-type';
@@ -67,7 +68,11 @@ export default function CasualJob() {
             const dataUrl = await toPng(ref.current, {
                 cacheBust: true,
                 backgroundColor:'#ffffff',
-                pixelRatio: 2
+                pixelRatio: 1,
+                // width:1080,
+                // height:1440,
+                canvasWidth:1080,
+                canvasHeight:1440,
             });
             const link = document.createElement('a');
             link.download = fileName;
@@ -121,15 +126,15 @@ export default function CasualJob() {
 
                         <div className="chart-wrapper">   
                             <h4>Jobs by Category</h4>                         
-                            <ResponsiveContainer width="100%" height={220}>
+                            <ResponsiveContainer width="100%" height={200}>
                                 <PieChart>
                                     <Pie 
                                         data={chartData} 
                                         dataKey="count" nameKey="name" 
                                         cx="50%" 
                                         cy="30%" 
-                                        outerRadius={65} 
-                                        innerRadius={35}
+                                        outerRadius={35} 
+                                        innerRadius={15}
                                         label={({ percent=0 }) => `${(percent * 100).toFixed(0)}%`}
                                     >
                                     </Pie>
